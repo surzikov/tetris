@@ -1,13 +1,13 @@
 let table = document.querySelector('#table')
 let table_arr = []
 let map = []
-let true_time = 300
+let true_time = 200
 let time = true_time
 let time_short = true_time/5
 let height = 20
-let width = 14
+let width = 12
 let block
-let colors = ['gray','red','green','blue']
+let colors = ['rgb(150, 163, 163)','rgb(231, 213, 49)','rgb(55, 231, 49)','rgb(76, 49, 231)']
 let blocks = [
     [
         [
@@ -49,20 +49,22 @@ let blocks = [
     ],
     [
         [
+            [0,3],
             [3,3],
             [3,0]
         ],
         [
-            [3,3],
-            [0,3]
+            [3,3,0],
+            [0,3,3]
         ],
         [
             [0,3],
-            [3,3]
+            [3,3],
+            [3,0]
         ],
         [
-            [3,0],
-            [3,3]
+            [3,3,0],
+            [0,3,3]
         ]
     ],
     [
@@ -83,6 +85,26 @@ let blocks = [
         [
             [3,0,0],
             [3,3,3]
+        ]
+    ],
+    [
+        [
+            [1,0],
+            [1,1],
+            [1,0]
+        ],
+        [
+            [1,1,1],
+            [0,1,0]
+        ],
+        [
+            [0,1],
+            [1,1],
+            [0,1]
+        ],
+        [
+            [0,1,0],
+            [1,1,1]
         ]
     ]
 ]
@@ -124,6 +146,7 @@ document.addEventListener('keydown', (e)=>{
     if(flag_rotate == false){
         flag_rotate = true
         if(e.key == 'w' || e.key == 'W' || e.key == 'ц' || e.key == 'Ц' || e.key == 'ArrowUp'){
+            let old_x = x
             let new_x = block[move_direction][0].length/2
             if(block[move_direction][0].length % 2 == 1){
                 new_x = Math.ceil(new_x)
@@ -133,10 +156,53 @@ document.addEventListener('keydown', (e)=>{
             }else{
                 x+=new_x-1
             }
+            let old_direction = move_direction
+            let flag_rotate_touch = false
             move_direction++
+            if(move_direction > 3){
+                move_direction = 0
+            }
+            for(let a = 0;a<block[move_direction].length;a++){
+                for(let b = 0;b<block[move_direction][a].length;b++){
+                    if(help_map[y+a][x+b] != 0){
+                        flag_rotate_touch = true
+                    }
+                }
+            }
+            if(flag_rotate_touch == true){
+                x = old_x
+                move_direction = old_direction
+            }
+            
         }
         if(e.key == 's' || e.key == 'S' || e.key == 'ы' || e.key == 'Ы' || e.key == 'ArrowDown'){
+            let old_x = x
+            let new_x = block[move_direction][0].length/2
+            if(block[move_direction][0].length % 2 == 1){
+                new_x = Math.ceil(new_x)
+            }
+            if(move_direction % 2 == 1){
+                x-=Math.ceil(block[0][0].length/2)-1
+            }else{
+                x+=new_x-1
+            }
+            let old_direction = move_direction
+            let flag_rotate_touch = false
             move_direction--
+            if(move_direction < 0){
+                move_direction = 3
+            }
+            for(let a = 0;a<block[move_direction].length;a++){
+                for(let b = 0;b<block[move_direction][a].length;b++){
+                    if(help_map[y+a][x+b] != 0){
+                        flag_rotate_touch = true
+                    }
+                }
+            }
+            if(flag_rotate_touch == true){
+                x = old_x
+                move_direction = old_direction
+            }
         }
         if(move_direction < 0){
             move_direction = 3
@@ -149,13 +215,89 @@ document.addEventListener('keydown', (e)=>{
         time = time_short
     }
     if(e.key == 'a' || e.key == 'A' || e.key == 'ф' || e.key == 'Ф' || e.key == 'ArrowLeft'){
-        direction = -1
+        let flag_move_touch = false
+        let h
+        if(x!= 0){
+            let left_move_arr = []
+            for(let a = 0; a<block[move_direction].length;a++){
+                for(h = 0; block[move_direction][a][h] == 0;h++){
+
+                }
+                left_move_arr.push(h)
+            }
+            
+            for(let a = 0;a < left_move_arr.length;a++){
+                if(map[y+a][x-1+left_move_arr[a]] != 0){
+                    flag_move_touch = true
+                }
+            }
+            if(flag_move_touch == false){
+                direction = -1
+                x+=direction    
+            }
+            
+        }
+        
     }
     if(e.key == 'd' || e.key == 'D' || e.key == 'в' || e.key == 'В' || e.key == 'ArrowRight'){
-        direction = +1
+        let flag_move_touch = false
+        let h
+        if(x!= width){
+            let right_move_arr = []
+            for(let a = 0; a<block[move_direction].length;a++){
+                for(h = block[move_direction][0].length; block[move_direction][a][h] == 0;h--){
+
+                }
+                right_move_arr.push(h)
+            }
+            
+            for(let a = 0;a < right_move_arr.length;a++){
+                if(map[y+a][x+right_move_arr[a]] != 0){
+                    flag_move_touch = true
+                }
+            }
+            if(flag_move_touch == false){
+                direction = +1
+                x+=direction    
+            }
+            
+        }
     }
 
 })
+function checkLines(a){
+    let checked_lines = []
+    for(let l = 0; l<a.length;l++){
+        let flag_line = false
+        for(lw = 0;lw<width;lw++){
+            if(map[a[l]][lw] == 0){
+                flag_line = true
+            }
+        }
+        if(flag_line == false){
+            checked_lines.push(a[l])
+        }
+    }
+    clearLines(checked_lines)
+}
+function clearLines(a){
+    for(let l = 0; l<a.length;l++){
+        for(let lw=0;lw<width;lw++){
+            map[a[l]][lw] = 0
+        }
+    }
+    for(let alll = 0;alll<a.length;alll++){
+        for(let ll = a[alll];ll>1;ll--){
+            for(let lp = 0; lp<width;lp++){
+                map[ll][lp] = map[ll-1][lp]
+            }
+        }
+    }
+    console.log(a)
+    spawnBlock()
+}
+
+
 function spawnBlock(){
     help_map = []
     for(let a = 0; a<map.length; a++){
@@ -170,23 +312,24 @@ function spawnBlock(){
     x = Math.floor(width/2) - Math.floor(block[move_direction][0].length/2)
     for(let a = 0; a<block[move_direction].length; a++){
         for(let b = 0; b<block[move_direction][a].length;b++){
-            if(help_map[a][b] != 0){
+            if(help_map[a][x+b] != 0){
                 flag_touch = true
             }
         }
 
     }
     
-    if(y == 0 & flag_touch == true){
-        alert('sdf')
+    if( flag_touch == true){
+        document.querySelector('#loseMessage').style.display = 'grid'
     }else{
+        console.log(block)
         drawBlock()
     }
 }
 let flag_touch = false
 function drawBlock(){
     let help_y = y
-    x+=direction
+    
     for(let a = 0; a<block[move_direction].length; a++){
         
         let help_x = x
@@ -201,6 +344,7 @@ function drawBlock(){
         y++
         x = help_x
     }
+    
     y = help_y
     direction = 0
     drawMap()
@@ -210,7 +354,7 @@ function drawBlock(){
     for(let l = 0; l <block[move_direction][block[move_direction].length-1].length;l++){
 
         if(y != height-block[move_direction].length & y != 0){
-            for(h = block[move_direction].length; map[y+h-1][x+l] == 0; h--){
+            for(h = block[move_direction].length; block[move_direction][h-1][l] == 0; h--){
                 
             }
             block_arr.push(h-1)
@@ -226,8 +370,12 @@ function drawBlock(){
     }
     if(y == height-block[move_direction].length || flag_touch == true){
         flag_touch = false
+        let arr_lines = []
+        for(let a = 0;a<block[move_direction].length;a++){
+            arr_lines.push(y+a)
+        }
         move_direction = 0
-        spawnBlock()
+        checkLines(arr_lines)
     }else{
         drawMap()
         setTimeout(moveBlock, time)
@@ -241,7 +389,9 @@ function moveBlock(){
             map[a][b] = help_map[a][b]
         }
     }
+    
     y++
+    
     drawBlock()
 }
 
