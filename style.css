@@ -1,8 +1,13 @@
 #table{
     border-spacing: 0px;
+    border: 1px solid black;
 }
 td{
-    height: 4vw;
-    width: 4vw;
-    border: 1px solid black;
+    height: 3vw;
+    width: 3vw;
+    color: rgb(76, 49, 231);
+    
+}
+#loseMessage{
+    display: none;
 }
